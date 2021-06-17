@@ -2,24 +2,30 @@ const express = require('express')
 const app = express()
 const path = require('path')
 const cors = require('cors')
+const todojs = require('./routers/todo.js')
+const userjs = require('./routers/user.js')
+const auth = require('./middleware/auth.js')
 
-app.use(express.urlencoded({extended:false}))
+app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.set("view engine", "ejs")
 app.use(cors())
 
-var mysql = require('mysql')
-var connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "daftar"
-});
+// var mysql = require('mysql')
+// var connection = mysql.createConnection({
+//     host: "localhost",
+//     user: "root",
+//     password: "",
+//     database: "daftar"
+// });
 
-connection.connect(function(err){
-    if(err) throw err;
-    console.log("yeee connected !!!")
-})
+// connection.connect(function(err){
+//     if(err) throw err;
+//     console.log("yeee connected !!!")
+// })
+
+app.use('/todo',auth,todojs)
+app.use('/user',userjs)
 
 // app.get('/',(req,res)=>{
 //     res.send(
@@ -33,39 +39,49 @@ connection.connect(function(err){
 //     )
 // })
 
-app.get('/todo',(req,res)=>{
-    connection.connect(function(err) {
-        connection.query("SELECT * FROM daftartodo", function (err, result, fields) {
-            if (err) throw err;
-            // const result1 = Object.values(JSON.parse(JSON.stringify(result)));
-            res.json(result)
-            //res.json
-            // res.render('index',{hasil:result})
-        });
-    });
-})
-app.post('/todo',(req,res)=>{
-    var isi = req.body.catatan
-    console.log(req.body.catatan)
-    var content = "INSERT INTO daftartodo (catatan) VALUES (?)"
-    connection.query(content,isi, function (err, result) {
-        if (err) throw err;
-        console.log("1 record inserted");
-    });
-    console.log('sudah terhandle oleh post di /todo')
-    console.log(req.body)
-    res.end()
-})
+// app.get('/todo',(req,res)=>{
+//     connection.connect(function(err) {
+//         connection.query("SELECT * FROM daftartodo", function (err, result, fields) {
+//             if (err) throw err;
+//             // const result1 = Object.values(JSON.parse(JSON.stringify(result)));
+//             res.json(result)
+//             //res.json
+//             // res.render('index',{hasil:result})
+//         });
+//     });
+// })
+// app.post('/todo',(req,res)=>{
+//     var isi = req.body.catatan
+//     console.log(req.body.catatan)
+//     var content = "INSERT INTO daftartodo (catatan) VALUES (?)"
+    
+//     connection.query(content,isi, function (err, result) {
+//         if (err){
+//             throw err
+//         }else{
+//             var lastID = result.insertId
+//             // res.json({id: result.insertId, catatan: isi})
+//             // res.json(result)
+//             console.log(result.insertId)
+//             console.log(isi)
+//             console.log("1 record inserted");
+//         }
+//     });
+//     console.log('sudah terhandle oleh post di /todo')
+//     console.log(req.body)
+    
+//     res.end()
+// })
 
-app.delete('/todo/:id',(req,res)=>{
-    var content = "DELETE from daftartodo WHERE id = (?)"
-    connection.query(content,req.params.id, function (err, result) {
-        console.log(req.params.id)
-        if (err) throw err;
-        console.log("1 record deleted");
-    });
-    res.end()
-})
+// app.delete('/todo/:id',(req,res)=>{
+//     var content = "DELETE from daftartodo WHERE id = (?)"
+//     connection.query(content,req.params.id, function (err, result) {
+//         console.log(req.params.id)
+//         if (err) throw err;
+//         console.log("1 record deleted");
+//     });
+//     res.end()
+// })
 
 
 // app.get('/',(req,res)=>{
@@ -82,65 +98,73 @@ app.delete('/todo/:id',(req,res)=>{
 //     )
 // })
 
-app.post('/userAuth',(req,res)=>{
-    try{
-        const {username,password} = req.body
-        // console.log(username)
-        // console.log(password)
-        if(!username || !password){
-            return res.status(400).send("fail")
-        }
-        connection.query('SELECT * FROM user WHERE username = (?) AND password = (?)', [username,password], function(err,result){ 
-            if(result.length <= 0){
-                console.log(result.length)
-                console.log(result)
-                res.status(401).send("fail")
-                console.log("login fail")
-            }else{
-                console.log(result.length)
-                console.log(result)
-                // res.redirect('/todo')
-                console.log("success login")
-            }
-        })
-    }catch(err){
-        console.log(err)
-    }
-})
+// app.post('/userAuth',(req,res)=>{
+//     try{
+//         const {username,password} = req.body
+//         // console.log(username)
+//         // console.log(password)
+//         if(!username || !password){
+//             return res.status(400).send("fail")
+//         }
+//         connection.query('SELECT * FROM user WHERE username = (?) AND password = (?)', [username,password], function(err,result){ 
+//             if(result.length <= 0){
+//                 console.log(result.length)
+//                 console.log(result)
+//                 res.status(401).send("fail")
+//                 console.log("login fail")
+//             }else{
+//                 console.log(result.length)
+//                 console.log(result)
+//                 // res.redirect('/todo')
+//                 console.log("success login")
+//             }
+//         })
+//     }catch(err){
+//         console.log(err)
+//     }
+// })
 
 
-app.post('/user',(req,res)=>{
-    var isi = [req.body.username, req.body.password]
-    console.log(req.body.catatan)
-    var content = "INSERT INTO user (username,password) VALUES (?,?)"
-    connection.query(content,isi, function (err, result) {
-        if (err) throw err;
-        console.log("1 record inserted");
-    });
-    console.log('sudah terhandle oleh post di /user')
-    console.log(req.body)
-    res.end()
-})
+// app.post('/user',(req,res)=>{
+//     if(req.body.username.length >0 && req.body.password.length>0){
+//         var isi = [req.body.username, req.body.password]
+//         console.log(req.body.catatan)
+//         var content = "INSERT INTO user (username,password) VALUES (?,?)"
+//         connection.query(content,isi, function (err, result) {
+//             if (err) {
+//                 res.end(500)
+//                 // throw err
+//                 return
+//             };
+//         });
+//         // console.log('sudah terhandle oleh post di /user')
+//         // console.log(req.body)
+//         res.end()
+//     }else{
+//         res.end()
+//     }
+    
+// })
 
-app.get('/user',(req,res)=>{
-    connection.connect(function(err) {
-        connection.query("SELECT * FROM user", function (err, result, fields) {
-            if (err) throw err;
-            res.json(result)
-        });
-    });
-})
+// app.get('/user',(req,res)=>{
+//     connection.connect(function(err) {
+//         connection.query("SELECT * FROM user", function (err, result, fields) {
+//             if (err) throw err;
+//             res.json(result)
+//         });
+//     });
+// })
 
-app.delete('/user/:id',(req,res)=>{
-    var content = "DELETE from user WHERE userid = (?)"
-    connection.query(content,req.params.id, function (err, result) {
-        console.log(req.params.id)
-        if (err) 
-            throw err;
-        else
-            console.log("1 record deleted");
-    });
-    res.end()
-})
+// app.delete('/user/:id',(req,res)=>{
+//     var content = "DELETE from user WHERE userid = (?)"
+//     connection.query(content,req.params.id, function (err, result) {
+//         console.log(req.params.id)
+//         if (err) 
+//             throw err;
+//         else
+//             console.log("1 record deleted");
+//     });
+//     res.end()
+// })
 
 app.listen(3000, ()=> console.log(`server started on 3000`))
