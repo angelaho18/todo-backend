@@ -35,20 +35,15 @@ router.post('/',(req, res, next) =>{
     })
 },(req,res)=>{
     if(req.body.username!=null && req.body.password!=null){
-        // var isi = [req.body.username, req.body.password]
         const {username,password} = req.body
         console.log(username + "dan "+password)
-        // console.log(req.body.catatan)
         var content = "INSERT INTO user (username,password) VALUES (?,?)"
         connection.query(content,[username,password], function (err, result) {
             if (err) {
                 res.send(500)
-                // throw err
                 return
             }
         });
-        // console.log('sudah terhandle oleh post di /user')
-        // console.log(req.body)
         res.end()
     }else{
         res.end()
